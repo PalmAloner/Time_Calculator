@@ -412,56 +412,54 @@
             var totalMinutes = endMinutes - startMinutes;
             var totalHours = totalMinutes / 60;
             
-            var shift1Start = 20.5 * 60;
-            var shift1End = 24 * 60;
-            var shift2Start = 24 * 60;
-            var shift2End = 27 * 60;
+            var shift1Start = 20.5 * 60;  // 20:30 = 1230 นาที
+            var shift1End = 24 * 60;       // 24:00 = 1440 นาที
+            var shift2Start = 0;           // 00:00 = 0 นาที (วันถัดไป)
+            var shift2End = 3 * 60;        // 03:00 = 180 นาที (วันถัดไป)
             
             var tolerance = 30;
             
-            var specialMinutes = 0;
+            var shift1Minutes = 0;
+            var shift2Minutes = 0;
             var regularMinutes = 0;
             
+            // นับทีละนาทีว่าอยู่ในช่วงไหน
             for (var m = startMinutes; m < endMinutes; m++) {
-                var normalizedMin = m % (24 * 60);
-                var adjustedMin = normalizedMin < startMinutes % (24 * 60) ? normalizedMin + 24 * 60 : normalizedMin;
+                var currentMin = m % (24 * 60);
                 
-                if (adjustedMin >= shift1Start && adjustedMin < shift2End) {
-                    specialMinutes++;
-                } else {
+                // ถ้าเวลาปัจจุบันอยู่ในช่วง 20:30-24:00
+                if (currentMin >= shift1Start && currentMin < shift1End) {
+                    shift1Minutes++;
+                }
+                // ถ้าเวลาปัจจุบันอยู่ในช่วง 00:00-03:00
+                else if (currentMin >= shift2Start && currentMin < shift2End) {
+                    shift2Minutes++;
+                }
+                // นอกช่วงพิเศษ
+                else {
                     regularMinutes++;
                 }
             }
             
-            var shift1Minutes = 0;
-            var shift2Minutes = 0;
-            
-            for (var m = startMinutes; m < endMinutes; m++) {
-                var normalizedMin = m % (24 * 60);
-                var adjustedMin = normalizedMin < startMinutes % (24 * 60) ? normalizedMin + 24 * 60 : normalizedMin;
-                
-                if (adjustedMin >= shift1Start && adjustedMin < shift1End) {
-                    shift1Minutes++;
-                } else if (adjustedMin >= shift2Start && adjustedMin < shift2End) {
-                    shift2Minutes++;
-                }
-            }
-            
-            var shift1FullMinutes = 210;
-            var shift2FullMinutes = 180;
+            var shift1FullMinutes = 210;  // 3.5 ชม. = 210 นาที
+            var shift2FullMinutes = 180;  // 3 ชม. = 180 นาที
             
             var boxes = 0;
             
+            // คำนวณกล่องช่วงที่ 1 (20:30-24:00)
             if (shift1Minutes >= shift1FullMinutes - tolerance) {
                 boxes = boxes + 30;
-            } else if (shift1Minutes >= 60) {
-                boxes = boxes + Math.floor(shift1Minutes / 60) * 6;
+            } else {
+                // คำนวณแบบละเอียด: 6 กล่อง/ชม. = 0.1 กล่อง/นาที
+                boxes = boxes + Math.floor(shift1Minutes / 10);
             }
             
+            // คำนวณกล่องช่วงที่ 2 (00:00-03:00)
             if (shift2Minutes >= shift2FullMinutes - tolerance) {
                 boxes = boxes + 20;
-            } else if (shift2Minutes >= 60) {
-                boxes = boxes + Math.floor(shift2Minutes / 60) * 6;
+            } else {
+                // คำนวณแบบละเอียด: 6 กล่อง/ชม. = 0.1 กล่อง/นาที
+                boxes = boxes + Math.floor(shift2Minutes / 10);
             }
             
             var regularHours = regularMinutes / 60;
