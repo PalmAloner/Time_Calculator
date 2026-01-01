@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคำนวดเวลาทำงาน</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #4c1d95;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #4c1d95;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .info {
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        input {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .add-btn {
+            align-self: flex-end;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: #f3f4f6;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #4c1d95;
+            font-size: 0.9em;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        tr.received {
+            background: #d1fae5;
+        }
+
+        tr.received:hover {
+            background: #a7f3d0;
+        }
+
+        .box-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .summary h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: white;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .summary-value {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 10px 5px;
+            }
+
+            .summary-value {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>เครื่องคำนวดเวลาทำงาน</h1>
+            <div class="info">
+                ช่วงพิเศษ:<br>
+                • 20:30-00:00 ทำครบ = 30 กล่อง | ไม่ครบ = 1 ชม.เต็ม = 6 กล่อง<br>
+                • 00:00-03:00 ทำครบ = 20 กล่อง | ไม่ครบ = 1 ชม.เต็ม = 6 กล่อง<br>
+                • เวลาเลท ± 30 นาที ยังถือว่าครบ<br>
+                นอกช่วงพิเศษ = นับเฉพาะชั่วโมงธรรมดา
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>ชื่อ</label>
+                    <input type="text" id="name" placeholder="ชื่อผู้ทำงาน">
+                </div>
+                <div class="form-group">
+                    <label>วันที่</label>
+                    <input type="date" id="date">
+                </div>
+                <div class="form-group">
+                    <label>เวลาเริ่ม (เช่น 20.30 )</label>
+                    <input type="text" id="startTime" placeholder="20.30">
+                </div>
+                <div class="form-group">
+                    <label>เวลาสิ้นสุด (เช่น 03.00 )</label>
+                    <input type="text" id="endTime" placeholder="03.00">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="add-btn" onclick="addEntry()">เพิ่ม</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="entriesCard" style="display: none;">
+            <h2>รายการทำงาน</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th>วันที่</th>
+                            <th>เวลา</th>
+                            <th class="text-center">ชม.รวม</th>
+                            <th class="text-center">ชม.ธรรมดา</th>
+                            <th class="text-center">กล่อง</th>
+                            <th class="text-center">รับแล้ว</th>
+                            <th class="text-center">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entriesTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" id="summaryByNameCard" style="display: none;">
+            <h2>สรุปแยกตามรายชื่อ (ยังไม่ได้รับ)</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th class="text-center">จำนวนวัน</th>
+                            <th class="text-center">ชม.รวม</th>
+                            <th class="text-center">ชม.ธรรมดา</th>
+                            <th class="text-center">กล่อง</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryByNameTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" id="summaryReceivedCard" style="display: none;">
+            <h2>สรุปแยกตามรายชื่อ (รับแล้ว)</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th class="text-center">จำนวนวัน</th>
+                            <th class="text-center">ชม.รวม</th>
+                            <th class="text-center">ชม.ธรรมดา</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryReceivedTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var entries = [];
+
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwh1aeraZVeXKVLFDGD7WshFzCsZODtklsSzPkEgHqU3JApuyE24YekRNQzgBZ-Y-dH8w/exec";
+
+        // โหลดข้อมูลจาก localStorage เมื่อเริ่มต้น
+        function loadData() {
+            try {
+                var saved = localStorage.getItem('workEntries');
+                if (saved) {
+                    entries = JSON.parse(saved);
+                    renderEntries();
+                    updateSummary();
+                }
+            } catch (e) {
+                console.error('Error loading data:', e);
+            }
+        }
+
+        // บันทึกข้อมูลลง localStorage
+        function saveData() {
+            try {
+                localStorage.setItem('workEntries', JSON.stringify(entries));
+            } catch (e) {
+                console.error('Error saving data:', e);
+            }
+        }
+        function saveToGoogleDrive() {
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-API-KEY": API_KEY
+        },
+        body: JSON.stringify({
+            key: API_KEY,
+            data: entries
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status !== "success") {
+            console.error("Google Script error:", data);
+        }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+    });
+}
+
+        function parseTime(timeStr) {
+            timeStr = timeStr.trim().replace('.', ':');
+            
+            var parts = timeStr.split(':');
+            if (parts.length !== 2) {
+                return null;
+            }
+            
+            var hour = parseInt(parts[0]);
+            var min = parseInt(parts[1]);
+            
+            if (isNaN(hour) || isNaN(min) || hour < 0 || hour > 23 || min < 0 || min > 59) {
+                return null;
+            }
+            
+            return hour + ':' + (min < 10 ? '0' + min : min);
+        }
+
+        function calculateBoxes(start, end) {
+            var timeStart = start.split(':');
+            var startHour = parseInt(timeStart[0]);
+            var startMin = parseInt(timeStart[1]);
+            
+            var timeEnd = end.split(':');
+            var endHour = parseInt(timeEnd[0]);
+            var endMin = parseInt(timeEnd[1]);
+            
+            var startMinutes = startHour * 60 + startMin;
+            var endMinutes = endHour * 60 + endMin;
+            
+            if (endMinutes <= startMinutes) {
+                endMinutes = endMinutes + 24 * 60;
+            }
+            
+            var totalMinutes = endMinutes - startMinutes;
+            var totalHours = totalMinutes / 60;
+            
+            var shift1Start = 20.5 * 60;
+            var shift1End = 24 * 60;
+            var shift2Start = 24 * 60;
+            var shift2End = 27 * 60;
+            
+            var tolerance = 30;
+            
+            var specialMinutes = 0;
+            var regularMinutes = 0;
+            
+            for (var m = startMinutes; m < endMinutes; m++) {
+                var normalizedMin = m % (24 * 60);
+                var adjustedMin = normalizedMin < startMinutes % (24 * 60) ? normalizedMin + 24 * 60 : normalizedMin;
+                
+                if (adjustedMin >= shift1Start && adjustedMin < shift2End) {
+                    specialMinutes++;
+                } else {
+                    regularMinutes++;
+                }
+            }
+            
+            var shift1Minutes = 0;
+            var shift2Minutes = 0;
+            
+            for (var m = startMinutes; m < endMinutes; m++) {
+                var normalizedMin = m % (24 * 60);
+                var adjustedMin = normalizedMin < startMinutes % (24 * 60) ? normalizedMin + 24 * 60 : normalizedMin;
+                
+                if (adjustedMin >= shift1Start && adjustedMin < shift1End) {
+                    shift1Minutes++;
+                } else if (adjustedMin >= shift2Start && adjustedMin < shift2End) {
+                    shift2Minutes++;
+                }
+            }
+            
+            var shift1FullMinutes = 210;
+            var shift2FullMinutes = 180;
+            
+            var boxes = 0;
+            
+            if (shift1Minutes >= shift1FullMinutes - tolerance) {
+                boxes = boxes + 30;
+            } else if (shift1Minutes >= 60) {
+                boxes = boxes + Math.floor(shift1Minutes / 60) * 6;
+            }
+            
+            if (shift2Minutes >= shift2FullMinutes - tolerance) {
+                boxes = boxes + 20;
+            } else if (shift2Minutes >= 60) {
+                boxes = boxes + Math.floor(shift2Minutes / 60) * 6;
+            }
+            
+            var regularHours = regularMinutes / 60;
+            
+            return {
+                totalHours: Math.round(totalHours * 100) / 100,
+                boxes: boxes,
+                regularHours: Math.round(regularHours * 100) / 100
+            };
+        }
+
+        function addEntry() {
+            var name = document.getElementById('name').value;
+            var date = document.getElementById('date').value;
+            var startTimeInput = document.getElementById('startTime').value;
+            var endTimeInput = document.getElementById('endTime').value;
+
+            if (!name || !date || !startTimeInput || !endTimeInput) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            var startTime = parseTime(startTimeInput);
+            var endTime = parseTime(endTimeInput);
+            
+            if (!startTime || !endTime) {
+                alert('รูปแบบเวลาไม่ถูกต้อง กรุณาใส่เป็น 20.30 หรือ 20:30');
+                return;
+            }
+
+            var result = calculateBoxes(startTime, endTime);
+            
+            var newEntry = {
+                id: Date.now(),
+                name: name,
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
+                totalHours: result.totalHours,
+                boxes: result.boxes,
+                regularHours: result.regularHours,
+                received: false
+            };
+
+            entries.push(newEntry);
+            
+            document.getElementById('name').value = '';
+            document.getElementById('date').value = '';
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
+            
+            saveData();
+            renderEntries();
+            updateSummary();
+        }
+
+        function deleteEntry(id) {
+            var newEntries = [];
+            for (var i = 0; i < entries.length; i++) {
+                if (entries[i].id !== id) {
+                    newEntries.push(entries[i]);
+                }
+            }
+            entries = newEntries;
+            saveData();
+            renderEntries();
+            updateSummary();
+        }
+
+        function toggleReceived(id) {
+            for (var i = 0; i < entries.length; i++) {
+                if (entries[i].id === id) {
+                    entries[i].received = !entries[i].received;
+                    break;
+                }
+            }
+            saveData();
+            renderEntries();
+        }
+
+        function renderEntries() {
+            var tbody = document.getElementById('entriesTable');
+            var entriesCard = document.getElementById('entriesCard');
+            
+            if (entries.length === 0) {
+                entriesCard.style.display = 'none';
+                return;
+            }
+            
+            entriesCard.style.display = 'block';
+            
+            var html = '';
+            for (var i = 0; i < entries.length; i++) {
+                var entry = entries[i];
+                html = html + '<tr class="' + (entry.received ? 'received' : '') + '">';
+                html = html + '<td style="font-weight: 600;">' + entry.name + '</td>';
+                html = html + '<td>' + entry.date + '</td>';
+                html = html + '<td>' + entry.startTime + ' - ' + entry.endTime + '</td>';
+                html = html + '<td class="text-center" style="font-weight: 600;">' + entry.totalHours + '</td>';
+                html = html + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + entry.regularHours + '</td>';
+                html = html + '<td class="text-center"><span class="box-badge">' + entry.boxes + '</span></td>';
+                html = html + '<td class="text-center"><input type="checkbox" class="checkbox" ' + (entry.received ? 'checked' : '') + ' onchange="toggleReceived(' + entry.id + ')"></td>';
+                html = html + '<td class="text-center"><button class="delete-btn" onclick="deleteEntry(' + entry.id + ')">ลบ</button></td>';
+                html = html + '</tr>';
+            }
+            
+            tbody.innerHTML = html;
+        }
+
+        function updateSummary() {
+            var summaryByNameCard = document.getElementById('summaryByNameCard');
+            var summaryReceivedCard = document.getElementById('summaryReceivedCard');
+            
+            if (entries.length === 0) {
+                summaryByNameCard.style.display = 'none';
+                summaryReceivedCard.style.display = 'none';
+                return;
+            }
+            
+            // สรุปแยกตามชื่อ (ยังไม่ได้รับ)
+            var summaryByName = {};
+            
+            // สรุปแยกตามชื่อ (รับแล้ว)
+            var summaryReceived = {};
+            
+            for (var i = 0; i < entries.length; i++) {
+                var entry = entries[i];
+                var name = entry.name;
+                
+                if (entry.received) {
+                    // รายการที่รับแล้ว
+                    if (!summaryReceived[name]) {
+                        summaryReceived[name] = {
+                            count: 0,
+                            totalHours: 0,
+                            regularHours: 0
+                        };
+                    }
+                    
+                    summaryReceived[name].count = summaryReceived[name].count + 1;
+                    summaryReceived[name].totalHours = summaryReceived[name].totalHours + entry.totalHours;
+                    summaryReceived[name].regularHours = summaryReceived[name].regularHours + entry.regularHours;
+                } else {
+                    // รายการที่ยังไม่ได้รับ
+                    if (!summaryByName[name]) {
+                        summaryByName[name] = {
+                            count: 0,
+                            totalHours: 0,
+                            regularHours: 0,
+                            boxes: 0
+                        };
+                    }
+                    
+                    summaryByName[name].count = summaryByName[name].count + 1;
+                    summaryByName[name].totalHours = summaryByName[name].totalHours + entry.totalHours;
+                    summaryByName[name].regularHours = summaryByName[name].regularHours + entry.regularHours;
+                    summaryByName[name].boxes = summaryByName[name].boxes + entry.boxes;
+                }
+            }
+            
+            // แสดงตารางยังไม่ได้รับ
+            var names = [];
+            for (var name in summaryByName) {
+                names.push(name);
+            }
+            
+            if (names.length > 0) {
+                summaryByNameCard.style.display = 'block';
+                
+                var tbody = document.getElementById('summaryByNameTable');
+                var html = '';
+                
+                for (var i = 0; i < names.length; i++) {
+                    var name = names[i];
+                    var data = summaryByName[name];
+                    
+                    html = html + '<tr>';
+                    html = html + '<td style="font-weight: 600;">' + name + '</td>';
+                    html = html + '<td class="text-center">' + data.count + '</td>';
+                    html = html + '<td class="text-center" style="font-weight: 600;">' + (Math.round(data.totalHours * 100) / 100) + '</td>';
+                    html = html + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + (Math.round(data.regularHours * 100) / 100) + '</td>';
+                    html = html + '<td class="text-center"><span class="box-badge">' + (Math.round(data.boxes * 10) / 10) + '</span></td>';
+                    html = html + '</tr>';
+                }
+                
+                tbody.innerHTML = html;
+            } else {
+                summaryByNameCard.style.display = 'none';
+            }
+            
+            // แสดงตารางรับแล้ว
+            var receivedNames = [];
+            for (var name in summaryReceived) {
+                receivedNames.push(name);
+            }
+            
+            if (receivedNames.length > 0) {
+                summaryReceivedCard.style.display = 'block';
+                
+                var tbody2 = document.getElementById('summaryReceivedTable');
+                var html2 = '';
+                
+                for (var i = 0; i < receivedNames.length; i++) {
+                    var name = receivedNames[i];
+                    var data = summaryReceived[name];
+                    
+                    html2 = html2 + '<tr>';
+                    html2 = html2 + '<td style="font-weight: 600;">' + name + '</td>';
+                    html2 = html2 + '<td class="text-center">' + data.count + '</td>';
+                    html2 = html2 + '<td class="text-center" style="font-weight: 600;">' + (Math.round(data.totalHours * 100) / 100) + '</td>';
+                    html2 = html2 + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + (Math.round(data.regularHours * 100) / 100) + '</td>';
+                    html2 = html2 + '</tr>';
+                }
+                
+                tbody2.innerHTML = html2;
+            } else {
+                summaryReceivedCard.style.display = 'none';
+            }
+        }
+
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
