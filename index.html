@@ -328,7 +328,8 @@
     <script>
         var entries = [];
 
-            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwh1aeraZVeXKVLFDGD7WshFzCsZODtklsSzPkEgHqU3JApuyE24YekRNQzgBZ-Y-dH8w/exec";
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVzXuV3HY_EJ7X5ya-W8ngVTHXLcQHNoAQhPH6zhOAkUad65fxhF4UFfw95NyUgO_pgw/exec";
+            const API_KEY = "PALM_SECRET_123";
 
         // โหลดข้อมูลจาก localStorage เมื่อเริ่มต้น
         function loadData() {
@@ -452,16 +453,18 @@
             if (shift1Minutes >= shift1FullMinutes - tolerance) {
                 boxes = boxes + 30;
             } else {
-                // คำนวณแบบละเอียด: 6 กล่อง/ชม. = 0.1 กล่อง/นาที
-                boxes = boxes + Math.floor(shift1Minutes / 10);
+                // คำนวณ: 6 กล่อง/ชม. = (นาที / 60) × 6
+                var shift1Hours = shift1Minutes / 60;
+                boxes = boxes + Math.round(shift1Hours * 6);
             }
             
             // คำนวณกล่องช่วงที่ 2 (00:00-03:00)
             if (shift2Minutes >= shift2FullMinutes - tolerance) {
                 boxes = boxes + 20;
             } else {
-                // คำนวณแบบละเอียด: 6 กล่อง/ชม. = 0.1 กล่อง/นาที
-                boxes = boxes + Math.floor(shift2Minutes / 10);
+                // คำนวณ: 6 กล่อง/ชม. = (นาที / 60) × 6
+                var shift2Hours = shift2Minutes / 60;
+                boxes = boxes + Math.round(shift2Hours * 6);
             }
             
             var regularHours = regularMinutes / 60;
