@@ -346,12 +346,14 @@
 
         // บันทึกข้อมูลลง localStorage
         function saveData() {
-            try {
-                localStorage.setItem('workEntries', JSON.stringify(entries));
-            } catch (e) {
-                console.error('Error saving data:', e);
-            }
-        }
+    try {
+        localStorage.setItem('workEntries', JSON.stringify(entries));
+        saveToGoogleDrive(); // 🔥 เรียกตรงนี้
+    } catch (e) {
+        console.error('Error saving data:', e);
+    }
+}
+
         function saveToGoogleDrive() {
     fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
