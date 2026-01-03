@@ -52,7 +52,7 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -259,6 +259,10 @@
                     <input type="text" id="endTime" placeholder="03.00">
                 </div>
                 <div class="form-group">
+                    <label>หมายเหตุ (ถ้ามี)</label>
+                    <input type="text" id="note" placeholder="หมายเหตุ">
+                </div>
+                <div class="form-group">
                     <label>&nbsp;</label>
                     <button class="add-btn" onclick="addEntry()">เพิ่ม</button>
                 </div>
@@ -274,6 +278,7 @@
                             <th>ชื่อ</th>
                             <th>วันที่</th>
                             <th>เวลา</th>
+                            <th>หมายเหตุ</th>
                             <th class="text-center">ชม.รวม</th>
                             <th class="text-center">ชม.ธรรมดา</th>
                             <th class="text-center">กล่อง</th>
@@ -530,6 +535,7 @@
             var date = document.getElementById('date').value;
             var startTimeInput = document.getElementById('startTime').value;
             var endTimeInput = document.getElementById('endTime').value;
+            var note = document.getElementById('note').value;
 
             if (!name || !date || !startTimeInput || !endTimeInput) {
                 alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -552,6 +558,7 @@
                 date: date,
                 startTime: startTime,
                 endTime: endTime,
+                note: note || '',
                 totalHours: result.totalHours,
                 boxes: result.boxes,
                 regularHours: result.regularHours,
@@ -564,6 +571,7 @@
             document.getElementById('date').value = '';
             document.getElementById('startTime').value = '';
             document.getElementById('endTime').value = '';
+            document.getElementById('note').value = '';
             
             saveData();
             renderEntries();
@@ -613,6 +621,7 @@
                 html = html + '<td style="font-weight: 600;">' + entry.name + '</td>';
                 html = html + '<td>' + entry.date + '</td>';
                 html = html + '<td>' + entry.startTime + ' - ' + entry.endTime + '</td>';
+                html = html + '<td style="color: #6b7280; font-size: 0.9em;">' + (entry.note || '-') + '</td>';
                 html = html + '<td class="text-center" style="font-weight: 600;">' + entry.totalHours + '</td>';
                 html = html + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + entry.regularHours + '</td>';
                 html = html + '<td class="text-center"><span class="box-badge">' + entry.boxes + '</span></td>';
