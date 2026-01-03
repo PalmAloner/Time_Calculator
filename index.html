@@ -251,11 +251,11 @@
                     <input type="date" id="date">
                 </div>
                 <div class="form-group">
-                    <label>เวลาเริ่ม (เช่น 20.30 )</label>
+                    <label>เวลาเริ่ม (เช่น 20.30)</label>
                     <input type="text" id="startTime" placeholder="20.30">
                 </div>
                 <div class="form-group">
-                    <label>เวลาสิ้นสุด (เช่น 03.00 )</label>
+                    <label>เวลาสิ้นสุด (เช่น 03.00)</label>
                     <input type="text" id="endTime" placeholder="03.00">
                 </div>
                 <div class="form-group">
@@ -328,8 +328,8 @@
     <script>
         var entries = [];
 
-            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVzXuV3HY_EJ7X5ya-W8ngVTHXLcQHNoAQhPH6zhOAkUad65fxhF4UFfw95NyUgO_pgw/exec";
-            const API_KEY = "PALM_SECRET_123";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVzXuV3HY_EJ7X5ya-W8ngVTHXLcQHNoAQhPH6zhOAkUad65fxhF4UFfw95NyUgO_pgw/exec";
+        const API_KEY = "PALM_SECRET_123";
 
         // โหลดข้อมูลจาก localStorage เมื่อเริ่มต้น
         function loadData() {
@@ -345,38 +345,36 @@
             }
         }
 
-        // บันทึกข้อมูลลง localStorage
-        function saveData() {
-    try {
-        localStorage.setItem('workEntries', JSON.stringify(entries));
-        saveToGoogleDrive(); // 🔥 เรียกตรงนี้
-    } catch (e) {
-        console.error('Error saving data:', e);
-    }
-}
-
-        function saveToGoogleDrive() {
-    fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-API-KEY": API_KEY
-        },
-        body: JSON.stringify({
-            key: API_KEY,
-            data: entries
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status !== "success") {
-            console.error("Google Script error:", data);
+        // บันทึกข้อมูลลง localStorage และ Google Drive
+        async function saveData() {
+            try {
+                localStorage.setItem('workEntries', JSON.stringify(entries));
+                await saveToGoogleDrive();
+            } catch (e) {
+                console.error('Error saving data:', e);
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+            }
         }
-    })
-    .catch(err => {
-        console.error("Fetch error:", err);
-    });
-}
+
+        async function saveToGoogleDrive() {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        key: API_KEY,
+                        data: entries
+                    })
+                });
+                
+                console.log('Data saved to Google Drive successfully');
+            } catch (err) {
+                console.error("Error saving to Google Drive:", err);
+            }
+        }
 
         function parseTime(timeStr) {
             timeStr = timeStr.trim().replace('.', ':');
@@ -413,7 +411,7 @@
             }
             
             var totalMinutes = endMinutes - startMinutes;
-            var totalHours = totalMinutes / 60;
+            var totalHours = Math.floor(totalMinutes / 60); // ตัดทิ้งถ้าไม่ถึงชั่วโมง
             
             var shift1Start = 20.5 * 60;  // 20:30 = 1230 นาที
             var shift1End = 24 * 60;       // 24:00 = 1440 นาที
@@ -454,8 +452,8 @@
                 boxes = boxes + 30;
             } else {
                 // คำนวณ: 6 กล่อง/ชม. = (นาที / 60) × 6
-                var shift1Hours = shift1Minutes / 60;
-                boxes = boxes + Math.round(shift1Hours * 6);
+                var shift1Hours = Math.floor(shift1Minutes / 60); // ตัดทิ้งถ้าไม่ถึงชั่วโมง
+                boxes = boxes + (shift1Hours * 6);
             }
             
             // คำนวณกล่องช่วงที่ 2 (00:00-03:00)
@@ -463,16 +461,16 @@
                 boxes = boxes + 20;
             } else {
                 // คำนวณ: 6 กล่อง/ชม. = (นาที / 60) × 6
-                var shift2Hours = shift2Minutes / 60;
-                boxes = boxes + Math.round(shift2Hours * 6);
+                var shift2Hours = Math.floor(shift2Minutes / 60); // ตัดทิ้งถ้าไม่ถึงชั่วโมง
+                boxes = boxes + (shift2Hours * 6);
             }
             
-            var regularHours = regularMinutes / 60;
+            var regularHours = Math.floor(regularMinutes / 60); // ตัดทิ้งถ้าไม่ถึงชั่วโมง
             
             return {
-                totalHours: Math.round(totalHours * 100) / 100,
+                totalHours: totalHours,
                 boxes: boxes,
-                regularHours: Math.round(regularHours * 100) / 100
+                regularHours: regularHours
             };
         }
 
@@ -543,6 +541,7 @@
             }
             saveData();
             renderEntries();
+            updateSummary();
         }
 
         function renderEntries() {
@@ -643,10 +642,10 @@
                     
                     html = html + '<tr>';
                     html = html + '<td style="font-weight: 600;">' + name + '</td>';
-                    html = html + '<td class="text-center">' + data.count + '</td>';
-                    html = html + '<td class="text-center" style="font-weight: 600;">' + (Math.round(data.totalHours * 100) / 100) + '</td>';
-                    html = html + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + (Math.round(data.regularHours * 100) / 100) + '</td>';
-                    html = html + '<td class="text-center"><span class="box-badge">' + (Math.round(data.boxes * 10) / 10) + '</span></td>';
+                    html = html + '<td class="text-center" style="font-weight: 600;">' + data.count + '</td>';
+                    html = html + '<td class="text-center" style="font-weight: 600;">' + data.totalHours + '</td>';
+                    html = html + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + data.regularHours + '</td>';
+                    html = html + '<td class="text-center"><span class="box-badge">' + data.boxes + '</span></td>';
                     html = html + '</tr>';
                 }
                 
@@ -673,9 +672,9 @@
                     
                     html2 = html2 + '<tr>';
                     html2 = html2 + '<td style="font-weight: 600;">' + name + '</td>';
-                    html2 = html2 + '<td class="text-center">' + data.count + '</td>';
-                    html2 = html2 + '<td class="text-center" style="font-weight: 600;">' + (Math.round(data.totalHours * 100) / 100) + '</td>';
-                    html2 = html2 + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + (Math.round(data.regularHours * 100) / 100) + '</td>';
+                    html2 = html2 + '<td class="text-center" style="font-weight: 600;">' + data.count + '</td>';
+                    html2 = html2 + '<td class="text-center" style="font-weight: 600;">' + data.totalHours + '</td>';
+                    html2 = html2 + '<td class="text-center" style="color: #6b7280; font-weight: 600;">' + data.regularHours + '</td>';
                     html2 = html2 + '</tr>';
                 }
                 
