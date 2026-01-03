@@ -331,17 +331,59 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVzXuV3HY_EJ7X5ya-W8ngVTHXLcQHNoAQhPH6zhOAkUad65fxhF4UFfw95NyUgO_pgw/exec";
         const API_KEY = "PALM_SECRET_123";
 
-        // โหลดข้อมูลจาก localStorage เมื่อเริ่มต้น
-        function loadData() {
+        // โหลดข้อมูลจาก Google Drive และ localStorage
+        async function loadData() {
             try {
-                var saved = localStorage.getItem('workEntries');
-                if (saved) {
-                    entries = JSON.parse(saved);
-                    renderEntries();
-                    updateSummary();
+                // ลองโหลดจาก Google Drive ก่อน
+                const driveData = await loadFromGoogleDrive();
+                
+                if (driveData && driveData.length > 0) {
+                    entries = driveData;
+                    localStorage.setItem('workEntries', JSON.stringify(entries));
+                    console.log('Loaded from Google Drive:', entries.length, 'entries');
+                } else {
+                    // ถ้าไม่มีใน Drive ให้โหลดจาก localStorage
+                    var saved = localStorage.getItem('workEntries');
+                    if (saved) {
+                        entries = JSON.parse(saved);
+                        console.log('Loaded from localStorage:', entries.length, 'entries');
+                    }
                 }
+                
+                renderEntries();
+                updateSummary();
             } catch (e) {
                 console.error('Error loading data:', e);
+                // ถ้าเกิด error ให้ลองโหลดจาก localStorage
+                try {
+                    var saved = localStorage.getItem('workEntries');
+                    if (saved) {
+                        entries = JSON.parse(saved);
+                        renderEntries();
+                        updateSummary();
+                    }
+                } catch (e2) {
+                    console.error('Error loading from localStorage:', e2);
+                }
+            }
+        }
+
+        async function loadFromGoogleDrive() {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?key=' + API_KEY, {
+                    method: "GET"
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === "success" && result.data) {
+                    return result.data;
+                }
+                
+                return null;
+            } catch (err) {
+                console.error("Error loading from Google Drive:", err);
+                return null;
             }
         }
 
