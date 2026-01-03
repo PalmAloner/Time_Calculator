@@ -338,22 +338,31 @@
                 const driveData = await loadFromGoogleDrive();
                 
                 if (driveData && driveData.length > 0) {
+                    // มีข้อมูลใน Drive = ใช้ของ Drive
                     entries = driveData;
                     localStorage.setItem('workEntries', JSON.stringify(entries));
-                    console.log('Loaded from Google Drive:', entries.length, 'entries');
+                    console.log('✅ Loaded from Google Drive:', entries.length, 'entries');
                 } else {
-                    // ถ้าไม่มีใน Drive ให้โหลดจาก localStorage
+                    // ไม่มีใน Drive = โหลดจาก localStorage
                     var saved = localStorage.getItem('workEntries');
                     if (saved) {
                         entries = JSON.parse(saved);
-                        console.log('Loaded from localStorage:', entries.length, 'entries');
+                        console.log('📦 Loaded from localStorage:', entries.length, 'entries');
+                        
+                        // อัพโหลดข้อมูลจาก localStorage ขึ้น Google Drive
+                        if (entries.length > 0) {
+                            console.log('⬆️ Uploading localStorage data to Google Drive...');
+                            await saveToGoogleDrive();
+                        }
+                    } else {
+                        console.log('ℹ️ No data found');
                     }
                 }
                 
                 renderEntries();
                 updateSummary();
             } catch (e) {
-                console.error('Error loading data:', e);
+                console.error('❌ Error loading data:', e);
                 // ถ้าเกิด error ให้ลองโหลดจาก localStorage
                 try {
                     var saved = localStorage.getItem('workEntries');
@@ -363,7 +372,7 @@
                         updateSummary();
                     }
                 } catch (e2) {
-                    console.error('Error loading from localStorage:', e2);
+                    console.error('❌ Error loading from localStorage:', e2);
                 }
             }
         }
